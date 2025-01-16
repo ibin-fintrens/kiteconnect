@@ -404,3 +404,14 @@ For more details about the different mode of quotes and subscribing for them, ta
   | start | lower |
   | end | upper |
   | percent | percentage |
+
+### Build
+By default, Maven uses the source directory src/main/java for building the project. However, in this case, you need to specify kiteconnect/src as the source directory in the configuration file. This configuration is already included but currently commented out. Simply uncomment it and then proceed with the standard Maven build process using the provided plugins.
+```js
+  <build>
+        <sourceDirectory>kiteconnect/src</sourceDirectory>
+        .
+        .
+        .
+    </build>
+   ```
