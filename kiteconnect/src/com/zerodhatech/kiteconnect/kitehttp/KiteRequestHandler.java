@@ -26,6 +26,7 @@ public class KiteRequestHandler {
     public KiteRequestHandler(Proxy proxy) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(10000, TimeUnit.MILLISECONDS);
+        builder.readTimeout(3000, TimeUnit.MILLISECONDS);
         if(proxy != null) {
             builder.proxy(proxy);
         }
