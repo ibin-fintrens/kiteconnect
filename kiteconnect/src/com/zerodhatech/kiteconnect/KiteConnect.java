@@ -20,7 +20,6 @@ import org.supercsv.prefs.CsvPreference;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
