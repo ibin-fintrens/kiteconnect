@@ -20,6 +20,7 @@ import org.supercsv.prefs.CsvPreference;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -79,6 +80,25 @@ public class KiteConnect {
         gson = gsonBuilder.setDateFormat("yyyy-MM-dd HH:mm:ss").create();
         ENABLE_LOGGING = enableDebugLog;
         kiteRequestHandler = new KiteRequestHandler(proxy);
+    }
+
+    public KiteConnect(String apiKey,String proxyHost,int proxyPort,String proxyType,String proxyUsername,String proxyPassword) {
+        this.apiKey = apiKey;
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+
+            @Override
+            public Date deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+                try {
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    return format.parse(jsonElement.getAsString());
+                } catch (ParseException e) {
+                    return null;
+                }
+            }
+        });
+        gson = gsonBuilder.setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+        kiteRequestHandler = new KiteRequestHandler(proxyHost,proxyPort, proxyType, proxyUsername, proxyPassword);
     }
 
     /** Registers callback for session error.
