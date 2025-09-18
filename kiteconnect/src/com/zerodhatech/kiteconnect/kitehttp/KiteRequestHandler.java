@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +18,8 @@ import java.util.concurrent.TimeUnit;
  * Request handler for all Http requests
  */
 public class KiteRequestHandler {
+    private final String proxyUser;
+    private final String proxyPassword;
 
     private OkHttpClient client;
     private String USER_AGENT = "javakiteconnect/3.1.14";
@@ -24,6 +27,8 @@ public class KiteRequestHandler {
     /** Initialize request handler.
      * @param proxy to be set for making requests.*/
     public KiteRequestHandler(Proxy proxy) {
+        this.proxyUser = null;
+        this.proxyPassword = null;
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(10000, TimeUnit.MILLISECONDS);
         builder.readTimeout(3000, TimeUnit.MILLISECONDS);
@@ -36,6 +41,45 @@ public class KiteRequestHandler {
         if(KiteConnect.ENABLE_LOGGING) {
             client = builder.addInterceptor(logging).build();
         }else {
+            client = builder.build();
+        }
+    }
+
+    public KiteRequestHandler(String proxyHost,
+                              int proxyPort,
+                              String proxyType,
+                              String proxyUserName,
+                              String proxyPass) {
+
+        this.proxyUser = proxyUserName;
+        this.proxyPassword = proxyPass;
+
+        Proxy.Type type = "SOCKS".equalsIgnoreCase(proxyType)
+                ? Proxy.Type.SOCKS
+                : Proxy.Type.HTTP;
+        Proxy userProxy = new Proxy(type, new InetSocketAddress(proxyHost, proxyPort));
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(10000, TimeUnit.MILLISECONDS);
+        builder.readTimeout(3000, TimeUnit.MILLISECONDS);
+        builder.proxy(userProxy);
+        builder.proxyAuthenticator(new Authenticator() {
+            @Override
+            public Request authenticate(Route route, Response response) throws IOException {
+                String credential = Credentials.basic(proxyUser,
+                        proxyPassword);
+                return response.request().newBuilder()
+                        .header("Proxy-Authorization", credential)
+                        .build();
+            }
+        });
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        if (KiteConnect.ENABLE_LOGGING) {
+            client = builder.addInterceptor(logging).build();
+        } else {
             client = builder.build();
         }
     }
